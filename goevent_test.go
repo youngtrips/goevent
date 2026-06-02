@@ -1,17 +1,19 @@
-package goevent
+package goevent_test
 
 import (
 	"sync"
 	"testing"
+
+	"github.com/youngtrips/goevent"
 )
 
 func TestEventNew(t *testing.T) {
-	p := New(true)
+	p := goevent.New(true)
 	t.Logf("Event: %+v", p)
 }
 
 func TestOnTrigger(t *testing.T) {
-	p := New(true)
+	p := goevent.New(true)
 
 	i := 1
 	err := p.On(func(j int) {
@@ -36,7 +38,7 @@ func TestOnTrigger(t *testing.T) {
 }
 
 func TestManyTrigger(t *testing.T) {
-	p := New(true)
+	p := goevent.New(true)
 	i := 0
 	p.On(func(j int) {
 		i += j
@@ -52,7 +54,7 @@ func TestManyTrigger(t *testing.T) {
 }
 
 func TestManyOn(t *testing.T) {
-	p := New(true)
+	p := goevent.New(true)
 	i := 0
 	m := sync.Mutex{}
 	for j := 0; j < 1000; j++ {
@@ -69,7 +71,7 @@ func TestManyOn(t *testing.T) {
 }
 
 func TestManyArgs(t *testing.T) {
-	e := New(true)
+	e := goevent.New(true)
 	var res []int
 	e.On(func(i, j, k int) {
 		res = append(res, i)
@@ -83,7 +85,7 @@ func TestManyArgs(t *testing.T) {
 }
 
 func TestOnWhenNotFunction(t *testing.T) {
-	p := New(true)
+	p := goevent.New(true)
 	err := p.On("foobar")
 	if err == nil {
 		t.Error("should return error When recieve not function. But got nil.")
@@ -91,7 +93,7 @@ func TestOnWhenNotFunction(t *testing.T) {
 }
 
 func TestOnWhenInvalidArgs(t *testing.T) {
-	p := New(true)
+	p := goevent.New(true)
 	p.On(func(i int) {})
 
 	err := p.On(func() {})
@@ -106,7 +108,7 @@ func TestOnWhenInvalidArgs(t *testing.T) {
 }
 
 func TestOff(t *testing.T) {
-	p := New(true)
+	p := goevent.New(true)
 	i := 0
 	j := 0
 	k := 0

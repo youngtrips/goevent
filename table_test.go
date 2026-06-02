@@ -1,16 +1,18 @@
-package goevent
+package goevent_test
 
 import (
 	"testing"
+
+	"github.com/youngtrips/goevent"
 )
 
 func TestNewTable(t *testing.T) {
-	ta := NewTable()
+	ta := goevent.NewTable()
 	t.Logf("%#v", ta)
 }
 
 func TestTableOnTrigger(t *testing.T) {
-	ta := NewTable()
+	ta := goevent.NewTable()
 	i := 0
 	err := ta.On("foo", func(j int) { i += j })
 	if err != nil {
@@ -27,7 +29,7 @@ func TestTableOnTrigger(t *testing.T) {
 }
 
 func TestTableTriggerFail(t *testing.T) {
-	ta := NewTable()
+	ta := goevent.NewTable()
 	err := ta.Trigger("foo", 1)
 	if err == nil {
 		t.Error("should return error when event has not been defined yet. But got nil")
@@ -35,7 +37,7 @@ func TestTableTriggerFail(t *testing.T) {
 }
 
 func TestTableOff(t *testing.T) {
-	ta := NewTable()
+	ta := goevent.NewTable()
 	ta.Off("foo", func() {})
 
 	i := 0
@@ -53,7 +55,7 @@ func TestTableOff(t *testing.T) {
 }
 
 func TestTableDestroy(t *testing.T) {
-	ta := NewTable()
+	ta := goevent.NewTable()
 	i := 0
 	ta.On("foo", func(j int) { i += j })
 
