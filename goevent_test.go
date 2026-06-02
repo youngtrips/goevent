@@ -1,19 +1,17 @@
-package goevent_test
+package goevent
 
 import (
 	"sync"
 	"testing"
-
-	"github.com/pocke/goevent"
 )
 
 func TestEventNew(t *testing.T) {
-	p := goevent.New()
-	t.Log("Event: %+v", p)
+	p := New(true)
+	t.Logf("Event: %+v", p)
 }
 
 func TestOnTrigger(t *testing.T) {
-	p := goevent.New()
+	p := New(true)
 
 	i := 1
 	err := p.On(func(j int) {
@@ -28,7 +26,7 @@ func TestOnTrigger(t *testing.T) {
 		t.Errorf("Expected i == 3, Got i == %d", i)
 	}
 	if err != nil {
-		t.Error("should not return error When not reject. But got %s.", err)
+		t.Errorf("should not return error When not reject. But got %s.", err)
 	}
 
 	err = p.Trigger("2")
@@ -38,7 +36,7 @@ func TestOnTrigger(t *testing.T) {
 }
 
 func TestManyTrigger(t *testing.T) {
-	p := goevent.New()
+	p := New(true)
 	i := 0
 	p.On(func(j int) {
 		i += j
@@ -54,7 +52,7 @@ func TestManyTrigger(t *testing.T) {
 }
 
 func TestManyOn(t *testing.T) {
-	p := goevent.New()
+	p := New(true)
 	i := 0
 	m := sync.Mutex{}
 	for j := 0; j < 1000; j++ {
@@ -71,7 +69,7 @@ func TestManyOn(t *testing.T) {
 }
 
 func TestManyArgs(t *testing.T) {
-	e := goevent.New()
+	e := New(true)
 	var res []int
 	e.On(func(i, j, k int) {
 		res = append(res, i)
@@ -85,7 +83,7 @@ func TestManyArgs(t *testing.T) {
 }
 
 func TestOnWhenNotFunction(t *testing.T) {
-	p := goevent.New()
+	p := New(true)
 	err := p.On("foobar")
 	if err == nil {
 		t.Error("should return error When recieve not function. But got nil.")
@@ -93,7 +91,7 @@ func TestOnWhenNotFunction(t *testing.T) {
 }
 
 func TestOnWhenInvalidArgs(t *testing.T) {
-	p := goevent.New()
+	p := New(true)
 	p.On(func(i int) {})
 
 	err := p.On(func() {})
@@ -108,7 +106,7 @@ func TestOnWhenInvalidArgs(t *testing.T) {
 }
 
 func TestOff(t *testing.T) {
-	p := goevent.New()
+	p := New(true)
 	i := 0
 	j := 0
 	k := 0

@@ -3,28 +3,28 @@ Package goevent is event dispatcher.
 
 Listen for event:
 
-    e := goevent.New()
-    e.On(func(i int, s string){
-      fmt.Printf("%d: %s\n", i, s)
-    })
+	e := goevent.New()
+	e.On(func(i int, s string){
+	  fmt.Printf("%d: %s\n", i, s)
+	})
 
 Trigger:
 
-    e.Trigger(1, "foo")
+	e.Trigger(1, "foo")
 
 Use event table:
 
-    table := goevent.NewTable()
-    table.On("foo", func(i int){
-      fmt.Printf("foo: %d\n", i)
-    })
-    table.On("bar", func(s string){
-      fmt.Printf("bar: %s\n", s)
-    })
+	table := goevent.NewTable()
+	table.On("foo", func(i int){
+	  fmt.Printf("foo: %d\n", i)
+	})
+	table.On("bar", func(s string){
+	  fmt.Printf("bar: %s\n", s)
+	})
 
-    table.Trigger("foo", 1)
-    table.Trigger("bar", "hoge")
-    table.Trigger("bar", 38)    // retrun error
+	table.Trigger("foo", 1)
+	table.Trigger("bar", "hoge")
+	table.Trigger("bar", 38)    // retrun error
 */
 package goevent
 
@@ -49,14 +49,15 @@ type event struct {
 
 	argTypes []reflect.Type
 	tmu      sync.RWMutex
+	seq      bool
 }
 
 // New creates a new event.
-func New() Event {
-	return &event{}
+func New(seq bool) Event {
+	return &event{
+		seq: seq,
+	}
 }
-
-var _ Event = New()
 
 func (p *event) Trigger(args ...interface{}) error {
 
@@ -75,16 +76,27 @@ func (p *event) Trigger(args ...interface{}) error {
 	p.lmu.RLock()
 	defer p.lmu.RUnlock()
 
-	wg := sync.WaitGroup{}
-	wg.Add(len(p.listeners))
-	for _, fn := range p.listeners {
-		go func(f reflect.Value) {
-			defer wg.Done()
-			f.Call(arguments)
-		}(fn)
+	if p.seq {
+		for _, fn := range p.listeners {
+			func(f reflect.Value) {
+				defer func() {
+					if err := recover(); err != nil {
+					}
+				}()
+				f.Call(arguments)
+			}(fn)
+		}
+	} else {
+		wg := sync.WaitGroup{}
+		wg.Add(len(p.listeners))
+		for _, fn := range p.listeners {
+			go func(f reflect.Value) {
+				defer wg.Done()
+				f.Call(arguments)
+			}(fn)
+		}
+		wg.Wait()
 	}
-
-	wg.Wait()
 	return nil
 }
 

@@ -6,7 +6,7 @@ import "sync"
 type Table interface {
 	Trigger(name string, args ...interface{}) error
 	// f is a function
-	On(name string, f interface{}) error
+	On(name string, f interface{}, concurrent ...bool) error
 	Off(name string, f interface{}) error
 	// Destroy a event
 	Destroy(name string) error
@@ -36,13 +36,17 @@ func (t *table) Trigger(name string, args ...interface{}) error {
 	return ev.Trigger(args...)
 }
 
-func (t *table) On(name string, f interface{}) error {
+func (t *table) On(name string, f interface{}, concurrent ...bool) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	ev, ok := t.events[name]
 	if !ok {
-		ev = New()
+		flag := false
+		if len(concurrent) > 0 {
+			flag = concurrent[0]
+		}
+		ev = New(flag)
 		t.events[name] = ev
 	}
 	return ev.On(f)
